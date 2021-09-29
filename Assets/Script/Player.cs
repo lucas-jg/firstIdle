@@ -5,12 +5,13 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     Rigidbody2D rigid;
-    public Animator ani;
+    private Animator ani;
 
     public float maxSpeed;
     void Start()
     {
         rigid = GetComponent<Rigidbody2D>();
+        ani = GetComponent<Animator>();
 
     }
 
@@ -23,11 +24,31 @@ public class Player : MonoBehaviour
 
     }
 
-    private void OnCollisionStay2D(Collision2D other)
+    private void OnCollisionEnter2D(Collision2D other)
     {
         if (other.gameObject.tag == "Monster")
         {
-            ani.SetBool("isAttack", true);
+            Monster monster = other.gameObject.GetComponent<Monster>();
+            StartCoroutine(AttackTarget(monster, 0.5f));
         }
     }
+
+    IEnumerator AttackTarget(Monster monster, float attackTime)
+    {
+        float healthPoint = monster.HealthPoint;
+
+        while (healthPoint > 0 && monster)
+        {
+            ani.SetBool("isAttack", true);
+            monster.HitMonster(10f);
+            healthPoint -= 10f;
+            yield return new WaitForSeconds(attackTime);
+
+        }
+        ani.SetBool("isAttack", false);
+        Debug.Log("Success AttackTarget");
+        yield return null;
+    }
+
+
 }
